@@ -1,0 +1,78 @@
+GEO_ID,GEO.id2,NAME,RACE,GROUP,TOTAL
+310M200US14460,14460,"Boston-Cambridge-Newton, MA-NH Metro Area","American Indian and Alaska Native alone, not Hispanic or Latino",POP_18_OVER_R1,3031
+310M200US14460,14461,"Boston-Cambridge-Newton, MA-NH Metro Area","Asian alone, not Hispanic or Latino",POP_18_OVER_R2,219742
+310M200US14460,14462,"Boston-Cambridge-Newton, MA-NH Metro Area","Black or African American alone, not Hispanic or Latino",POP_18_OVER_R3,218470
+310M200US14460,14463,"Boston-Cambridge-Newton, MA-NH Metro Area",Hispanic or Latino (of any race) (200-299),POP_18_OVER_R4,260702
+310M200US14460,14464,"Boston-Cambridge-Newton, MA-NH Metro Area","Some other race alone, not Hispanic or Latino",POP_18_OVER_R5,25055
+310M200US14460,14465,"Boston-Cambridge-Newton, MA-NH Metro Area","Two or more races, not Hispanic or Latino",POP_18_OVER_R6,34764
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","White alone, not Hispanic or Latino",POP_18_OVER_R7,2737698
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","American Indian and Alaska Native alone, not Hispanic or Latino",POP_M_18_24,210
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","Asian alone, not Hispanic or Latino",POP_M_18_24,17957
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","Black or African American alone, not Hispanic or Latino",POP_M_18_24,18287
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area",Hispanic or Latino (of any race) (200-299),POP_M_18_24,27662
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","Some other race alone, not Hispanic or Latino",POP_M_18_24,2182
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","Two or more races, not Hispanic or Latino",POP_M_18_24,4301
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","White alone, not Hispanic or Latino",POP_M_18_24,157781
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","American Indian and Alaska Native alone, not Hispanic or Latino",POP_M_25_34,192
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","Asian alone, not Hispanic or Latino",POP_M_25_34,28212
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","Black or African American alone, not Hispanic or Latino",POP_M_25_34,20678
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area",Hispanic or Latino (of any race) (200-299),POP_M_25_34,35795
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","Some other race alone, not Hispanic or Latino",POP_M_25_34,4199
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","Two or more races, not Hispanic or Latino",POP_M_25_34,3888
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","White alone, not Hispanic or Latino",POP_M_25_34,204047
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","American Indian and Alaska Native alone, not Hispanic or Latino",POP_M_35_44,246
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","Asian alone, not Hispanic or Latino",POP_M_35_44,23162
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","Black or African American alone, not Hispanic or Latino",POP_M_35_44,20991
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area",Hispanic or Latino (of any race) (200-299),POP_M_35_44,27761
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","Some other race alone, not Hispanic or Latino",POP_M_35_44,2852
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","Two or more races, not Hispanic or Latino",POP_M_35_44,2706
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","White alone, not Hispanic or Latino",POP_M_35_44,243706
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","American Indian and Alaska Native alone, not Hispanic or Latino",POP_M_45_64,559
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","Asian alone, not Hispanic or Latino",POP_M_45_64,26649
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","Black or African American alone, not Hispanic or Latino",POP_M_45_64,31744
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area",Hispanic or Latino (of any race) (200-299),POP_M_45_64,28680
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","Some other race alone, not Hispanic or Latino",POP_M_45_64,2647
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","Two or more races, not Hispanic or Latino",POP_M_45_64,4264
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","White alone, not Hispanic or Latino",POP_M_45_64,486045
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","American Indian and Alaska Native alone, not Hispanic or Latino",POP_M_65_OVER,124
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","Asian alone, not Hispanic or Latino",POP_M_65_OVER,8955
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","Black or African American alone, not Hispanic or Latino",POP_M_65_OVER,9629
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area",Hispanic or Latino (of any race) (200-299),POP_M_65_OVER,7495
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","Some other race alone, not Hispanic or Latino",POP_M_65_OVER,725
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","Two or more races, not Hispanic or Latino",POP_M_65_OVER,1301
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","White alone, not Hispanic or Latino",POP_M_65_OVER,212302
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","American Indian and Alaska Native alone, not Hispanic or Latino",POP_F_18_24,315
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","Asian alone, not Hispanic or Latino",POP_F_18_24,19518
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","Black or African American alone, not Hispanic or Latino",POP_F_18_24,18303
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area",Hispanic or Latino (of any race) (200-299),POP_F_18_24,26021
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","Some other race alone, not Hispanic or Latino",POP_F_18_24,2164
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","Two or more races, not Hispanic or Latino",POP_F_18_24,4561
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","White alone, not Hispanic or Latino",POP_F_18_24,160580
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","American Indian and Alaska Native alone, not Hispanic or Latino",POP_F_25_34,243
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","Asian alone, not Hispanic or Latino",POP_F_25_34,31311
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","Black or African American alone, not Hispanic or Latino",POP_F_25_34,23480
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area",Hispanic or Latino (of any race) (200-299),POP_F_25_34,34657
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","Some other race alone, not Hispanic or Latino",POP_F_25_34,3454
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","Two or more races, not Hispanic or Latino",POP_F_25_34,4229
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","White alone, not Hispanic or Latino",POP_F_25_34,208211
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","American Indian and Alaska Native alone, not Hispanic or Latino",POP_F_35_44,268
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","Asian alone, not Hispanic or Latino",POP_F_35_44,24656
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","Black or African American alone, not Hispanic or Latino",POP_F_35_44,23949
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area",Hispanic or Latino (of any race) (200-299),POP_F_35_44,29602
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","Some other race alone, not Hispanic or Latino",POP_F_35_44,2850
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","Two or more races, not Hispanic or Latino",POP_F_35_44,3560
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","White alone, not Hispanic or Latino",POP_F_35_44,251347
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","American Indian and Alaska Native alone, not Hispanic or Latino",POP_F_45_64,558
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","Asian alone, not Hispanic or Latino",POP_F_45_64,28905
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","Black or African American alone, not Hispanic or Latino",POP_F_45_64,36503
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area",Hispanic or Latino (of any race) (200-299),POP_F_45_64,33192
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","Some other race alone, not Hispanic or Latino",POP_F_45_64,3004
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","Two or more races, not Hispanic or Latino",POP_F_45_64,4436
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","White alone, not Hispanic or Latino",POP_F_45_64,514080
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","American Indian and Alaska Native alone, not Hispanic or Latino",POP_F_65_OVER,316
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","Asian alone, not Hispanic or Latino",POP_F_65_OVER,10417
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","Black or African American alone, not Hispanic or Latino",POP_F_65_OVER,14906
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area",Hispanic or Latino (of any race) (200-299),POP_F_65_OVER,9837
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","Some other race alone, not Hispanic or Latino",POP_F_65_OVER,978
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","Two or more races, not Hispanic or Latino",POP_F_65_OVER,1518
+310M200US14460,14466,"Boston-Cambridge-Newton, MA-NH Metro Area","White alone, not Hispanic or Latino",POP_F_65_OVER,299599

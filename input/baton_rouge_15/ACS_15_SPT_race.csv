@@ -1,0 +1,71 @@
+GROUP,RACE,TOTAL
+POP_M_18_24,Hispanic or Latino (of any race) (200-299),1985
+POP_M_18_24,White alone,25759
+POP_M_18_24,Black or African American alone,19023
+POP_M_18_24,American Indian and Alaska Native alone,143
+POP_M_18_24,Asian alone,1298
+POP_M_18_24,Some other race alone,166
+POP_M_18_24,Two or more races,675
+POP_M_25_34,Hispanic or Latino (of any race) (200-299),3647
+POP_M_25_34,White alone,32996
+POP_M_25_34,Black or African American alone,20494
+POP_M_25_34,American Indian and Alaska Native alone,266
+POP_M_25_34,Asian alone,1597
+POP_M_25_34,Some other race alone,75
+POP_M_25_34,Two or more races,787
+POP_M_35_44,Hispanic or Latino (of any race) (200-299),3242
+POP_M_35_44,White alone,29234
+POP_M_35_44,Black or African American alone,16660
+POP_M_35_44,American Indian and Alaska Native alone,107
+POP_M_35_44,Asian alone,1319
+POP_M_35_44,Some other race alone,69
+POP_M_35_44,Two or more races,466
+POP_M_45_64,Hispanic or Latino (of any race) (200-299),2045
+POP_M_45_64,White alone,63419
+POP_M_45_64,Black or African American alone,30766
+POP_M_45_64,American Indian and Alaska Native alone,151
+POP_M_45_64,Asian alone,1346
+POP_M_45_64,Some other race alone,73
+POP_M_45_64,Two or more races,848
+POP_M_65_OVER,Hispanic or Latino (of any race) (200-299),817
+POP_M_65_OVER,White alone,30440
+POP_M_65_OVER,Black or African American alone,10202
+POP_M_65_OVER,American Indian and Alaska Native alone,19
+POP_M_65_OVER,Asian alone,494
+POP_M_65_OVER,Some other race alone,29
+POP_M_65_OVER,Two or more races,370
+POP_F_18_24,Hispanic or Latino (of any race) (200-299),1879
+POP_F_18_24,White alone,25397
+POP_F_18_24,Black or African American alone,19275
+POP_F_18_24,American Indian and Alaska Native alone,78
+POP_F_18_24,Asian alone,1297
+POP_F_18_24,Some other race alone,61
+POP_F_18_24,Two or more races,834
+POP_F_25_34,Hispanic or Latino (of any race) (200-299),2171
+POP_F_25_34,White alone,31914
+POP_F_25_34,Black or African American alone,22762
+POP_F_25_34,American Indian and Alaska Native alone,34
+POP_F_25_34,Asian alone,1696
+POP_F_25_34,Some other race alone,99
+POP_F_25_34,Two or more races,580
+POP_F_35_44,Hispanic or Latino (of any race) (200-299),1898
+POP_F_35_44,White alone,28802
+POP_F_35_44,Black or African American alone,19091
+POP_F_35_44,American Indian and Alaska Native alone,104
+POP_F_35_44,Asian alone,1430
+POP_F_35_44,Some other race alone,74
+POP_F_35_44,Two or more races,598
+POP_F_45_64,Hispanic or Latino (of any race) (200-299),2123
+POP_F_45_64,White alone,65100
+POP_F_45_64,Black or African American alone,35794
+POP_F_45_64,American Indian and Alaska Native alone,243
+POP_F_45_64,Asian alone,1606
+POP_F_45_64,Some other race alone,126
+POP_F_45_64,Two or more races,944
+POP_F_65_OVER,Hispanic or Latino (of any race) (200-299),875
+POP_F_65_OVER,White alone,38373
+POP_F_65_OVER,Black or African American alone,15270
+POP_F_65_OVER,American Indian and Alaska Native alone,44
+POP_F_65_OVER,Asian alone,601
+POP_F_65_OVER,Some other race alone,34
+POP_F_65_OVER,Two or more races,213
