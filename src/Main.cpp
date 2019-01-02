@@ -1,176 +1,120 @@
-#include "IPF.h"
-#include "NDArray.h"
-#include <map>
-#include <string>
+/**
+*	@file	 main.cpp	
+*	@author	 Shailesh Tamrakar
+*	@date	 7/23/2018
+*	@version 1.0
+*
+*	@section DESCRIPTION
+*	The main purpose of this program is to generate a synthetic population
+*	to assess the impact of tax intervention (soda-tax) on Cardio-Vascular
+*	Disease (CVD) among economically derived population across US MSAs.
+*	It imports publicily available PUMS (Public Use Microdata Sample) 
+*	dataset as well as ACS (American Community Survey) estimates of socio-
+*	demographic variables as input parameters, followed by execution
+*	of IPU algorithm to create a synthetic population by simultaneously 
+*	matching both household and person-level attributes/estimates.
+*	 
+*/
+
 #include <iostream>
-#include <vector>
-#include <boost\tokenizer.hpp>
 #include <fstream>
-#include <numeric>
+#include <string>
+#include <vector>
+#include "Parameters.h"
+#include "PopBrewer.h"
+#include "CardioModel.h"
+#include "ViolenceModel.h"
+#include "csv.h"
+#include "IPU.h"
+#include "ACS.h"
 
-#define EDU_CAT 7
-#define RACE_CAT 7
-#define AGE_CAT 5
 
-namespace type
+int main(int argc, const char* argv[])
 {
-	typedef std::vector<std::string> Column;
-	typedef std::vector<Column> Row;
-	typedef boost::tokenizer<boost::escaped_list_separator<char>> TokenizerCSVFile;
-}
+	std::cout << "***********************************************************************\n";
+	std::cout << "************Welcome to Population Brewer*******************************\n";
+	std::cout << "This software generates synthetic population for US Metropolitan Areas\n";
+	std::cout << "***********************************************************************\n";
 
-type::Row readCSVFile(std::ifstream &file);
+	std::cout << std::endl;
 
-int main()
-{
-	std::ifstream file1, file2, file3;
-	file1.open("input\\baton_rouge_15\\sex_by_age\\age_marginal.csv", std::ios::in);
-	if(!file1.is_open()){
-		std::cout << "Cannot open File1!" << std::endl;
-		exit(EXIT_SUCCESS);
-	}
-		
-	file2.open("input\\baton_rouge_15\\sex_by_age\\gender_marginal.csv", std::ios::in);
-	if(!file2.is_open()){
-		std::cout << "Cannot open File2!" << std::endl;
-		exit(EXIT_SUCCESS);
-	}
+	std::vector<const char*> arguments;
+	const int NUM_ARGUMENTS = 3;
 
-	file3.open("input\\baton_rouge_15\\sex_by_age\\seed.csv", std::ios::in);
-	if(!file3.is_open()){
-		std::cout << "Cannot open Seed matrix file!" << std::endl;
-		exit(EXIT_SUCCESS);
-	}
-
-	//extracts education marginals from Education file
-	type::Row eduFile = readCSVFile(file1);
-	eduFile.erase(eduFile.begin(), eduFile.begin()+1);
-	std::vector<double>allEduMarginals;
-	for(auto it1 = eduFile.begin(); it1 != eduFile.end(); ++it1)
-		allEduMarginals.push_back(std::stod(it1->back()));
-
-	//double totEduMarginals = std::accumulate(eduMarginals.begin(), eduMarginals.end(), 0);
-
-	//extracts race marginals from Race File
-	type::Row raceFile = readCSVFile(file2);
-	raceFile.erase(raceFile.begin(), raceFile.begin()+1);
-	std::vector<double>allRaceMarginals;
-	for(auto it2 = raceFile.begin(); it2 != raceFile.end(); ++it2)
-		allRaceMarginals.push_back(std::stod(it2->back()));
-
-	//extract seed matrix
-	type::Row seedMatrixFile = readCSVFile(file3);
-	seedMatrixFile.erase(seedMatrixFile.begin(), seedMatrixFile.begin()+1);
-	std::vector<double>allSeedVec;
-	for(auto row = seedMatrixFile.begin(); row != seedMatrixFile.end(); ++row){
-		for(auto col = row->begin()+1; col != row->end(); ++col)
-			allSeedVec.push_back(std::stod(*col));
-	}
-
-	std::vector<std::vector<double>>marginals;
-	marginals.push_back(allRaceMarginals);
-	marginals.push_back(allEduMarginals);
-	
-
-	std::vector<int>m_size;
-	m_size.push_back(marginals[0].size());
-	m_size.push_back(marginals[1].size());
-
-	NDArray<double>seedArr(m_size);
-	seedArr.assign(allSeedVec);
-	deprecated::IPF ipf(seedArr, marginals);
-	ipf.solve(seedArr);
-
-	
-	/*int fromElems = 0;
-	int toElems = 0;
-
-	std::map<int, std::string>ageMap;
-	ageMap.insert(std::make_pair(0, "Male, Age 18-24"));
-	ageMap.insert(std::make_pair(1, "Male, Age 25-34"));
-	ageMap.insert(std::make_pair(2, "Male, Age 35-44"));
-	ageMap.insert(std::make_pair(3, "Male, Age 45-64"));
-	ageMap.insert(std::make_pair(4, "Male, Age 65+"));
-
-	ageMap.insert(std::make_pair(5, "Female, Age 18-24"));
-	ageMap.insert(std::make_pair(6, "Female, Age 25-34"));
-	ageMap.insert(std::make_pair(7, "Female, Age 35-44"));
-	ageMap.insert(std::make_pair(8, "Female, Age 45-64"));
-	ageMap.insert(std::make_pair(9, "Female, Age 65+"));
-
-	for(size_t ageCat = 0; ageCat < 2*AGE_CAT; ++ageCat)
+	if(argc < NUM_ARGUMENTS)
 	{
-		fromElems = ageCat*EDU_CAT;
-		toElems = fromElems+EDU_CAT;
-		std::vector<double>eduMarginal(allEduMarginals.begin()+fromElems, allEduMarginals.begin()+toElems);
-		double popByEducation = std::accumulate(eduMarginal.begin(), eduMarginal.end(), 0);
+		std::cout << "Program usage format\n";
+		std::cout << "Program name[Synthetic Pop] Input Directory[input] Output Directory[output]" << std::endl;
+		exit(EXIT_SUCCESS);
+	}
 
-		fromElems = ageCat*RACE_CAT;
-		toElems = fromElems+RACE_CAT;
-		std::vector<double>raceMarginal(allRaceMarginals.begin()+fromElems, allRaceMarginals.begin()+toElems);
-		double popByRace = std::accumulate(raceMarginal.begin(), raceMarginal.end(), 0);
+	for(int i = 0; i < argc; i++)
+		arguments.push_back(argv[i]);
 
-		if(popByEducation != popByRace){
-			if(popByEducation > popByRace){
-				double sumRace = 0;
-				for(size_t i = 0; i < raceMarginal.size(); ++i){
-					raceMarginal[i] = raceMarginal[i]*popByEducation/popByRace;
-					sumRace += raceMarginal[i];
-				}
-				popByRace = sumRace;
-			}
-			else{
-				double sumEdu = 0;
-				for(size_t j = 0; j < eduMarginal.size(); ++j){
-					eduMarginal[j] = eduMarginal[j]*popByRace/popByEducation;
-					sumEdu += eduMarginal[j];
-				}
-				popByEducation = (int)sumEdu;
-			}
+	std::cout << "****Available simulation models****" << std::endl;
+	std::cout << "1. Equity Efficiency Model" << std::endl;
+	std::cout << "2. Mass Violence Model\n" << std::endl;
+
+	int simType;
+
+	std::cout << "Please select simulation model (Enter 1 or 2) : ";
+	std::cin >> simType; 
+
+	if(std::cin.eof())
+		exit(EXIT_SUCCESS);
+
+	while(!std::cin.eof() && !std::cin.good() || simType < EQUITY_EFFICIENCY || simType > MASS_VIOLENCE)
+	{
+		std::cout << "Invalid input!" << std::endl;
+		std::cin.clear();
+		std::cin.ignore(256,'\n');
+
+		std::cout << "Please re-enter valid value: ";
+		std::cin >> simType;
+
+		if(std::cin.eof())
+			exit(EXIT_SUCCESS);
+	}
+
+	std::cout << std::endl;
+
+	Parameters *param = new Parameters(arguments[1], arguments[2], simType);
+
+	switch(param->getSimType())
+	{
+	case EQUITY_EFFICIENCY:
+		{
+			CardioModel *cvdModel = new CardioModel;
+
+			cvdModel->setParameters(*param);
+			cvdModel->import();
+			cvdModel->start();
+
+			delete cvdModel;
+			break;
 		}
 
-		std::vector<std::vector<double>>marginals;
-		marginals.push_back(eduMarginal);
-		marginals.push_back(raceMarginal);
+	case MASS_VIOLENCE:
+		{
+			ViolenceModel *massViolence = new ViolenceModel;
 
-		std::vector<int>m_size;
-		m_size.push_back(marginals[0].size());
-		m_size.push_back(marginals[1].size());
+			massViolence->setParameters(*param);
+			massViolence->import();
+			massViolence->start();
 
-		fromElems = ageCat*EDU_CAT*RACE_CAT;
-		toElems = fromElems+EDU_CAT*RACE_CAT;
-
-		std::cout << "Starting IPF for " << ageMap[ageCat] << ".....\n" << std::endl;
-		std::vector<double>seed(allSeedVec.begin()+fromElems, allSeedVec.begin()+toElems);
-		NDArray<double>seedArr(m_size);
-		seedArr.assign(seed);
-		deprecated::IPF ipf(seedArr, marginals);
-		ipf.solve(seedArr);
-		
-		std::cout << std::endl;
-
-		eduMarginal.clear();
-		raceMarginal.clear();
-		marginals.clear();
-		m_size.clear();
-		seed.clear();
-	}*/
-	
-	return 0;
-}
-
-type::Row readCSVFile(std::ifstream &file)
-{
-	type::Column col;
-	type::Row row;
-
-	std::string line;
-	while(std::getline(file, line))
-	{
-		type::TokenizerCSVFile token(line);
-		col.assign(token.begin(), token.end());
-		row.push_back(col);
+			delete massViolence;
+			break;
+		}
+	default:
+		break;
 	}
-	return row;
-}
+	
+	//PopBrewer *pop = new PopBrewer(param);
+	//pop->generate();
 
+	//system("PAUSE");
+	
+	//delete pop;
+	delete param;
+
+}

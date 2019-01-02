@@ -3,14 +3,15 @@
 #include "Parameters.h"
 
 
-PersonPums::PersonPums(MultiMapCB acsCodes) : m_acsCodeBook(acsCodes)
+PersonPums::PersonPums(std::shared_ptr<Parameters>param) : parameters(param)
 {
-	
+
 }
 
 
 PersonPums::~PersonPums()
 {
+	
 }
 
 
@@ -19,32 +20,49 @@ void PersonPums::setDemoCharacters(std::string p_puma, std::string p_idx, std::s
 	personID = to_number<double>(p_idx);
 	pumaCode = to_number<int>(p_puma);
 
-	setAge(to_number<int>(p_age));
-	setSex(to_number<int>(p_sex));
-	setEthnicity(to_number<int>(p_eth));
-	setRace(to_number<int>(p_race));
+	setAge(to_number<short int>(p_age));
+	setSex(to_number<short int>(p_sex));
+	setEthnicity(to_number<short int>(p_eth));
+	setRace(to_number<short int>(p_race));
 }
 
 void PersonPums::setSocialCharacters(std::string p_education, std::string p_marital)
 {
 	setEduAgeCat();
-	setEducation(to_number<int>(p_education));
-
-	setMaritalAgeCat();
-	setMaritalStatus(to_number<int>(p_marital));
+	setEducation(to_number<short int>(p_education));
 }
 
-void PersonPums::setAge(int p_age)
+void PersonPums::setAge(short int p_age)
 {
 	this->age = p_age;
+	Map ageMap = parameters->getACSCodeBook().find(ACS::PumsVar::AGEP)->second;
+
+	std::string mid_key = std::to_string(1+ageMap.size()/2);
+
+	if(age <= ageMap[mid_key])
+		setAgeCat(ageMap, ACS::AgeCat::Age_0_4, ACS::AgeCat::Age_40_44);
+	else if(age > ageMap[mid_key])
+		setAgeCat(ageMap, ACS::AgeCat::Age_45_49, ACS::AgeCat::Age_85_100);
 }
 
-void PersonPums::setSex(int p_sex)
+void PersonPums::setAgeCat(Map &ageMap, short int ageLowLim, short int ageUpLim)
+{
+	for(short int i = ageLowLim; i <= ageUpLim; ++i)
+	{
+		if(age <= ageMap[std::to_string(i)])
+		{
+			this->ageCat = i;
+			break;
+		}
+	}
+}
+
+void PersonPums::setSex(short int p_sex)
 {
 	this->sex = p_sex;
 }
 
-void PersonPums::setEthnicity(int p_ethnicity)
+void PersonPums::setEthnicity(short int p_ethnicity)
 {
 	this->ethnicity = p_ethnicity;
 	if(p_ethnicity != ACS::Ethnicity::Not_Hispanic)
@@ -57,9 +75,10 @@ void PersonPums::setEthnicity(int p_ethnicity)
 	}
 }
 
-void PersonPums::setRace(int p_race)
+void PersonPums::setRace(short int p_race)
 {
-	Map raceMap = m_acsCodeBook.find(ACS::PumsVar::RAC1P)->second;
+	Map raceMap = parameters->getACSCodeBook().find(ACS::PumsVar::RAC1P)->second;
+
 	if(p_race == raceMap.at("White alone") || p_race == raceMap.at("Black alone")){
 		this->race = p_race;
 	}
@@ -84,6 +103,7 @@ void PersonPums::setRace(int p_race)
 
 void PersonPums::setOrigin()
 {
+	
 	if(ethnicity == ACS::Ethnicity::Not_Hispanic)
 	{
 		switch(race)
@@ -102,6 +122,7 @@ void PersonPums::setOrigin()
 			break;
 		case ACS::Race::Hawaiian_Pacific:
 			this->originByRace = ACS::Origin::HawaiianNH;
+			break;
 		case ACS::Race::Some_Other:
 			this->originByRace = ACS::Origin::SomeOtherNH;
 			break;
@@ -116,11 +137,12 @@ void PersonPums::setOrigin()
 	{
 		this->originByRace = ACS::Origin::Hisp;
 	}
+
 }
 
-void PersonPums::setEducation(int p_education)
+void PersonPums::setEducation(short int p_education)
 {
-	Map eduMap = m_acsCodeBook.find(ACS::PumsVar::SCHL)->second;
+	Map eduMap = parameters->getACSCodeBook().find(ACS::PumsVar::SCHL)->second;
 
 	if(p_education < eduMap.at("Grade 9")){
 		this->education = ACS::Education::Less_9th_Grade;
@@ -128,7 +150,7 @@ void PersonPums::setEducation(int p_education)
 	else if(p_education >= eduMap.at("Grade 9") && p_education <= eduMap.at("12th grade")){
 		this->education = ACS::Education::_9th_To_12th_Grade;
 	}
-	else if(p_education == eduMap.at("High School")){ //|| p_education == eduMap.at("GED")){
+	else if(p_education == eduMap.at("High School") || p_education == eduMap.at("GED")){
 		this->education = ACS::Education::High_School;
 	}
 	else if(p_education == eduMap.at("Some college-Less than a year") || p_education == eduMap.at("Some College-More than a year")){
@@ -142,11 +164,12 @@ void PersonPums::setEducation(int p_education)
 	}
 	else{
 		this->education = ACS::Education::Graduate_Degree;
-	}	
+	}
 }
 
 void PersonPums::setEduAgeCat()
 {
+
 	if(age >= 18 && age <= 24){
 		this->eduAgeCat = ACS::EduAgeCat::Age_18_24;
 	}
@@ -159,37 +182,14 @@ void PersonPums::setEduAgeCat()
 	else if(age >= 45 && age <= 64){
 		this->eduAgeCat = ACS::EduAgeCat::Age_45_64;
 	}
-	else{
+	else if(age >= 65){
 		this->eduAgeCat = ACS::EduAgeCat::Age_65_Over;
 	}
-}
-
-void PersonPums::setMaritalAgeCat()
-{
-	if(age >=15 && age <= 19){
-		this->maritalAgeCat = ACS::MaritalAgeCat::Age_15_19;
-	}
-	else if(age >= 20 && age <= 34){
-		this->maritalAgeCat = ACS::MaritalAgeCat::Age_20_34;
-	}
-	else if(age >= 35 && age <= 44){
-		this->maritalAgeCat = ACS::MaritalAgeCat::Age_35_44;
-	}
-	else if(age >= 45 && age <= 54){
-		this->maritalAgeCat = ACS::MaritalAgeCat::Age_45_54;
-	}
-	else if(age >= 55 && age <= 64){
-		this->maritalAgeCat = ACS::MaritalAgeCat::Age_55_64;
-	}
-	else if(age >= 65){
-		this->maritalAgeCat = ACS::MaritalAgeCat::Age_65_Over;
+	else {
+		this->eduAgeCat = -1;
 	}
 }
 
-void PersonPums::setMaritalStatus(int p_marital)
-{
-	this->maritalStatus = p_marital;
-}
 
 double PersonPums::getPUMSID() const
 {
@@ -201,51 +201,46 @@ int PersonPums::getPumaCode() const
 	return pumaCode;
 }
 
-int PersonPums::getAge() const
+short int PersonPums::getAge() const
 {
 	return age;
 }
 
+short int PersonPums::getAgeCat() const
+{
+	return ageCat;
+}
 
-int PersonPums::getSex() const
+short int PersonPums::getSex() const
 {
 	return sex;
 }
 
-int PersonPums::getRace() const
+short int PersonPums::getRace() const
 {
 	return race;
 }
 
-int PersonPums::getEthnicity() const
+short int PersonPums::getEthnicity() const
 {
 	return ethnicity;
 }
 
-int PersonPums::getOrigin() const
+short int PersonPums::getOrigin() const
 {
 	return originByRace;
 }
 
-int PersonPums::getEducation() const
+short int PersonPums::getEducation() const
 {
 	return education;
 }
 
-int PersonPums::getEduAgeCat() const
+short int PersonPums::getEduAgeCat() const
 {
 	return eduAgeCat;
 }
 
-int PersonPums::getMaritalStatus() const
-{
-	return maritalStatus;
-}
-
-int PersonPums::getMaritalAgeCat() const
-{
-	return maritalAgeCat;
-}
 
 template<class T>
 T PersonPums::to_number(const std::string &data)
@@ -266,4 +261,7 @@ bool PersonPums::is_number(const std::string data)
 	bool flag = (end != data.c_str() && val != HUGE_VAL);
 	return flag;
 }
+
+
+
 

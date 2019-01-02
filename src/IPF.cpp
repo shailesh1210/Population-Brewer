@@ -200,6 +200,7 @@ size_t IPF::iters() const
   return m_iters;
 }
 
+
 bool IPF::computeErrors(std::vector<std::vector<double>>& diffs)
 {
   m_maxError = -std::numeric_limits<double>::max();
