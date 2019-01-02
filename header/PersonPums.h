@@ -7,7 +7,7 @@
 #include <list>
 #include <vector>
 #include <sstream>
-#include <boost/tokenizer.hpp>
+#include <cmath>
 
 class Parameters;
 
@@ -17,11 +17,10 @@ public:
 	typedef std::map<std::string, int> Map;
 	typedef std::multimap<int, Map> MultiMapCB;
 
-	typedef boost::tokenizer<boost::char_separator<char>>TokenizerString;
 	typedef std::vector<std::string> Column;
 	typedef std::list<Column> Row;
 
-	PersonPums(MultiMapCB);
+	PersonPums(std::shared_ptr<Parameters>);
 	virtual ~PersonPums();
 
 	void setDemoCharacters(std::string, std::string, std::string, std::string, std::string, std::string);
@@ -29,40 +28,37 @@ public:
 	
 	double getPUMSID() const;
 	int getPumaCode() const;
-	int getAge() const;
+	short int getAge() const;
+	short int getAgeCat() const;
 	
-	int getSex() const;
-	int getRace() const;
-	int getEthnicity() const;
-	int getOrigin() const;
-	int getEducation() const;
-	int getEduAgeCat() const;
-	int getMaritalStatus() const;
-	int getMaritalAgeCat() const;
+	short int getSex() const;
+	short int getRace() const;
+	short int getEthnicity() const;
+	short int getOrigin() const;
+	short int getEducation() const;
+	short int getEduAgeCat() const;
 
 private:
 
-	void setAge(int);
-	void setSex(int);
-	void setEthnicity(int);
-	void setRace(int);
+	void setAge(short int);
+	void setAgeCat(Map &, short int, short int);
+	void setSex(short int);
+	void setEthnicity(short int);
+	void setRace(short int);
 	void setOrigin();
-	void setEducation(int);
+	void setEducation(short int);
 	void setEduAgeCat();
-	void setMaritalStatus(int);
-	void setMaritalAgeCat();
 
 	template<class T>
 	T to_number(const std::string &);
 	bool is_number(const std::string);
-
-	MultiMapCB m_acsCodeBook;
+	
+	std::shared_ptr<Parameters> parameters;
 	int pumaCode;
 	double personID;
-	int age, sex;
-	int race, ethnicity, originByRace; 
-	int education, eduAgeCat;
-	int maritalStatus, maritalAgeCat;
+	short int age, ageCat, sex;
+	short int race, ethnicity, originByRace; 
+	short int education, eduAgeCat;
 };
 
 #endif __PersonPums_h__

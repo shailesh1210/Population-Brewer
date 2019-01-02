@@ -1,52 +1,31 @@
 #ifndef __Agent_h__
 #define __Agent_h__
 
-#include <iostream>
-#include <list>
-#include <string>
-#include <ctime>
-#include <map>
-#include <vector>
-#include <boost/random/uniform_int_distribution.hpp>
-#include <boost/random/uniform_real_distribution.hpp>
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/variate_generator.hpp>
-#include <boost/tokenizer.hpp>
-
 class Agent
 {
 public:
-	typedef boost::tokenizer<boost::char_separator<char>> TokenizerString;
-	typedef std::map<int, std::map<int, std::vector<double>>> ProbabilityMap; //typedef to store probabilities by race, age and sex
-
 	Agent();
-	virtual ~Agent();
+	~Agent();
 
-	void setID(int);
-	void setDemoAttributes(int, int, int);
-	void setEducation(const ProbabilityMap &);
-	void setMaritalStatus(const ProbabilityMap &);
+	void setHouseholdID(double);
+	void setPUMA(int);
+	void setAge(short int);
+	void setSex(short int);
+	void setOrigin(short int);
+	void setEducation(short int);
 
-	int getAgeCat() const;
-	int getAge() const;
-	int getGender() const;
-	int getRace() const;
-	int getEducation() const;
-	int getEduAgeCat() const;
-	int getMaritalStatus() const;
-	int getMaritalAgeCat() const;
+	double getHouseholdID() const;
+	int getPUMA() const;
+	short int getAge() const;
+	short int getSex() const;
+	short int getOrigin() const;
+	short int getEducation() const;
 
-private:
-	
-	void setEduAgeCat();
-	void setMaritalAgeCat();
-	int randInteger(int, int);
-	int getValue(const ProbabilityMap&, int, int);
-	double uniformRealDist();
-
-	int ID;
-	int ageCat, age, race, gender;
-	int education, eduAgeCat;
-	int maritalStatus, maritalAgeCat;
+protected:
+	double householdID;
+	int puma;
+	short int age, sex;
+	short int origin, education;
 };
-#endif __Agent_h__
+
+#endif

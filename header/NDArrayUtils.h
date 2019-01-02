@@ -93,6 +93,25 @@ void print(T* p, size_t n, size_t breakAt = 1000000, std::ostream& ostr = std::c
   ostr << std::endl;
 }
 
+template<typename T>
+void roundEstimates(std::vector<T>&est)
+{
+	double adj = 0;
+	for (size_t i = 0; i < est.size(); ++i)
+	{
+		double diff = adj + (est.at(i) - floor(est.at(i)));
+		if (diff >= 0.5) {
+			adj = diff - 1;
+			est.at(i) = ceil(est.at(i));
+		}
+		else {
+			adj = diff;
+			est.at(i) = floor(est.at(i));
+		}
+
+	}
+}
+
 //overloaded print method - Shailesh Tamrakar
 template<typename T>
 void print(T* p, const std::vector<int>sizes, Map &m_est, size_t breakAt = 1000000, std::ostream& ostr = std::cout)
@@ -114,13 +133,18 @@ void print(T* p, const std::vector<int>sizes, Map &m_est, size_t breakAt = 10000
 			est.push_back(p[col_size*i+j]);
 		}
 		
+		roundEstimates(est);
+
 		m_est.insert(std::make_pair(i+1, est));
 		//ostr << std::endl;
 		myfile << std::endl;
 	}
+  myfile << std::endl;
 
   myfile.close();
 }
+
+
 
 template<typename T>
 bool isZero(const std::vector<T>& v)

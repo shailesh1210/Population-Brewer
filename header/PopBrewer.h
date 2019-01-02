@@ -9,7 +9,7 @@
 #include <vector>
 #include <map>
 #include <boost/tokenizer.hpp>
-#include <unordered_map>
+//#include <unordered_map>
 
 class Parameters;
 class Metro;
@@ -23,31 +23,36 @@ public:
 	typedef std::vector<std::string> Columns;
 	typedef std::list<Columns> Rows;
 	typedef std::vector<double> Marginal;
+	typedef std::vector<std::string> Pool;
 	
+	PopBrewer();
 	PopBrewer(Parameters *);
 	virtual ~PopBrewer();
 
-	void generate();
+	void setParameters(const Parameters &);
+	void import();
 
-private:
+protected:
 	std::shared_ptr<Parameters>parameters;
-	void createMetroArea();
 
+	void importMetroArea();
 	void importEstimates();
 
 	void importRaceEstimates();
 	void importEducationEstimates();
-	void importMaritalStatusEstimates();
 
 	void importHHTypeEstimates();
+	void importHHSizeEstimates();
+	void importHHIncomeEstimates();
+
+	void importGQEstimates();
 
 	void setEstimates(const Rows &, const std::map<int, int>&, const size_t, int);
 
-	Rows readCSVFile(const char*);
-	
 	void mapMetroToCounties(const char*, std::multimap<std::string, std::string>&);
 	void mapCountiesToPUMA(const char*, std::multimap<std::string, County>&);
 
+	Rows readCSVFile(const char*);
 	template<class T>
 	std::map<int, int> getColumnIndexMap(std::list<T>*, Columns *);
 	int getColumnIndex(Columns *, std::string);

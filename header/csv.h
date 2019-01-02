@@ -76,7 +76,7 @@ inline int c99_snprintf(char* str, size_t size, const char* format, ...)
 
 #else
 
-#define snprintf std::snprintf
+//#define snprintf std::snprintf
 
 #endif // _MSC_VER
 

@@ -2,75 +2,139 @@
 #define __Counter_h__
 
 #include <iostream>
-#include "PersonPums.h"
-#include "Agent.h"
+#include <vector>
+#include <map>
+#include <string>
+#include <memory>
+#include <fstream>
+#include <cmath>
 
-namespace Counter
+#include "ViolenceAgent.h"
+
+class Parameters;
+
+struct Risk
 {
-	struct OriginBySexByAge
+	double val;
+	double lowLim;
+	double upLim;
+
+	Risk &operator+=(const Risk &r)
 	{
-		int sex, origin, ageCat;
+		this->val += r.val;
+		this->lowLim += r.lowLim;
+		this->upLim += r.upLim;
+
+		return *this;
+	}
+
+	Risk &operator/=(const int num_trials)
+	{
+		this->val /= num_trials;
+		this->lowLim /= num_trials;
+		this->upLim /= num_trials;
+
+		return *this;
+	}
+
+	friend std::ostream &operator<<(std::ostream &out, const Risk &r)
+	{
+		out << r.val << "," << r.lowLim << "," << r.upLim;
+		return out;
+	}
+
+};
+
+struct Outcomes
+{
+	double value[NUM_TREATMENT];
+	Risk diff;
+	Risk ratio;
+};
+
+
+class Counter
+{
+public:
+	typedef std::map<std::string, std::vector<bool>> TypeMap;
+	typedef std::map<int, int> MapInts;
+	typedef std::map<int, double> MapDbls;
+	typedef std::map<int, Outcomes> MapOutcomes;
+	typedef std::vector<std::string> Pool;
+	typedef std::pair<double, double> Pair;
+
+	Counter();
+	Counter(std::shared_ptr<Parameters>);
+	virtual ~Counter();
+
+	void setParameters(std::shared_ptr<Parameters>);
+
+	int getPersonCount(std::string) const;
+	int getHouseholdCount(std::string) const;
+
+	void initialize();
+	//void reset();
+	void output(std::string);
+
+	void addHouseholdCount(std::string);
+	void addPersonCount(std::string);
+
+	void addRiskFactorCount(std::string);
+
+	void addPtsdCount(int, int, int);
+	void addPtsdResolvedCount(int, int, int);
+	void addCbtReach(int, int);
+	void addSprReach(int, int);
+	void addCbtCount(int);
+	void addSprCount(int);
+	void addNaturalDecayCount(int);
+
+	void computeOutcomes(int, int);
+
+	Pair getPrevalence(int, int);
+	double getCbtUptake(int);
+	double getSprUptake(int);
+	double getNaturalDecayUptake(int);
+
+	void outputHouseholdCounts(std::string);
+	void outputPersonCounts(std::string);
+
+	void outputRiskFactorPercent();
+	void outputHealthOutcomes();
+
 	
-		OriginBySexByAge(int p_sex, int p_origin, int p_ageCat) : sex(p_sex), origin(p_origin), ageCat(p_ageCat){}
-		bool operator()(Agent &a){
-			return (a.getGender() == sex && a.getRace() == origin && a.getAgeCat() == ageCat);
-		}
-	};
+private:
 
-	struct EduByOrigin
-	{
-		int sex, origin, edu, eduAge;
+	void initHouseholdCounter();
+	void initPersonCounter();
+	void initRiskFacCounter();
+
+	void initPtsdCounter();
+	void initTreatmentCounter(int);
+
+	void computePrevalence(int, int);
+	void computeRecovery(int, int);
 	
-		EduByOrigin(int p_sex, int p_origin, int p_edu, int p_eduAge) : sex(p_sex), origin(p_origin), edu(p_edu), eduAge(p_eduAge){}
-		bool operator()(PersonPums &p){
-			return (p.getSex() == sex && p.getOrigin() == origin && p.getEducation() == edu && p.getEduAgeCat() == eduAge);
-		}
-		bool operator()(Agent &a){
-			return (a.getGender() == sex && a.getRace() == origin && a.getEducation() == edu && a.getEduAgeCat() == eduAge);
-		}
-	};
+	Pair computeError(double *, double *);
+	Risk computeDiff(double *, double);
+	Risk computeRatio(double *, double);
 
-	struct MaritalStatusByOrigin
-	{
-		int sex, origin, maritalStatus, maritalAgeCat;
-		MaritalStatusByOrigin(int p_sex, int p_origin, int p_marital, int p_maritalAge) : sex(p_sex), origin(p_origin), 
-			maritalStatus(p_marital), maritalAgeCat(p_maritalAge){}
+	void clearMap(TypeMap &);
+	void clearCounter();
 
-		bool operator()(Agent&a){
-			return (a.getGender() == sex && a.getRace() == origin && a.getMaritalStatus() == maritalStatus && a.getMaritalAgeCat() == maritalAgeCat);
-		}
-	};
+	std::shared_ptr<Parameters> parameters;
 
-	struct EduByRace
-	{
-		int sex, race, edu, eduAge;
+	TypeMap m_personCount, m_householdCount;
+	TypeMap m_riskFacCount;
+
+	//Counters for Mass Violence Model(PTSD and PTSD resolved)
+	MapInts m_ptsdCount[NUM_TREATMENT][NUM_PTSD], m_ptsdResolvedCount[NUM_TREATMENT][NUM_PTSD];
+	MapDbls m_totPrev[NUM_TREATMENT][NUM_PTSD], m_totRecovery[NUM_TREATMENT][NUM_PTSD];
+
+	MapInts m_cbtReach[NUM_TREATMENT], m_sprReach[NUM_TREATMENT];
+	MapInts m_cbtCount, m_sprCount, m_ndCount;
+	MapOutcomes m_prevalence, m_recovery;
 	
-		EduByRace(int p_sex, int p_race, int p_edu, int p_eduAge) : sex(p_sex), race(p_race), edu(p_edu), eduAge(p_eduAge){}
-		bool operator()(PersonPums &p){
-			return (p.getSex() == sex && p.getRace() == race && p.getEducation() == edu && p.getEduAgeCat() == eduAge);
-		}
-	};
 
-	struct EduByOriginByPUMA
-	{
-		int sex, eduAge, origin, edu, pumaCode;
-	
-		EduByOriginByPUMA(int p_sex, int p_eduAge,int p_origin, int p_edu,int p_puma) : sex(p_sex), eduAge(p_eduAge), origin(p_origin), edu(p_edu), pumaCode(p_puma){}
-		bool operator()(PersonPums &p){
-			return (p.getSex() == sex && p.getOrigin() == origin && p.getEducation() == edu && p.getEduAgeCat() == eduAge && p.getPumaCode() == pumaCode);
-		}
-	};
-
-	struct MaritalStatusByPUMA
-	{
-		int sex, maritalAge, origin, maritalStatus, pumaCode;
-		MaritalStatusByPUMA(int p_sex, int p_maritalAge, int p_origin, int p_marital, int p_puma) : 
-			sex(p_sex), maritalAge(p_maritalAge), origin(p_origin), maritalStatus(p_marital), pumaCode(p_puma){}
-
-		bool operator() (PersonPums &p){
-			return (p.getSex() == sex && p.getOrigin() == origin && p.getMaritalStatus() == maritalStatus && p.getMaritalAgeCat() == maritalAge && p.getPumaCode() == pumaCode);
-		}
-	};
-	
-}
+};
 #endif __Counter_h__

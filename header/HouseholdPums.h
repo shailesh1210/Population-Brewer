@@ -4,45 +4,52 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <memory>
 #include <vector>
 #include <map>
-#include "PersonPums.h"
+#include <cmath>
+
+class Parameters;
+class PersonPums;
 
 class HouseholdPums
 {
 public:
-	HouseholdPums(const std::map<std::string, int>&, const std::map<std::string, int>&);
+	
+	HouseholdPums(std::shared_ptr<Parameters>);
 	virtual ~HouseholdPums();
 
 	void setPUMA(std::string);
 	void setHouseholds(std::string, std::string, std::string, std::string);
-	void addPersons(PersonPums*);
+	void addPersons(PersonPums);
 
 	int getPUMA() const;
 	double getHouseholdIndex() const;
-	int getHouseholdType() const;
-	int getHouseholdSize() const;
+	short int getHouseholdType() const;
+	short int getHouseholdSize() const;
 	int getHouseholdIncome() const;
+	short int getHouseholdIncCat() const;
+	short int getHHTypeBySize() const;
 	std::vector<PersonPums> getPersons() const;
-
+	void clearPersonList();
+	
 private:
 
-	void setHouseholdType(int);
-	void setHouseholdSize(int);
+	void setHouseholdType(short int);
+	void setHouseholdSize(short int);
 	void setHouseholdIncome(int);
 
 	template<class T>
 	T to_number(const std::string &);
 	bool is_number(const std::string);
 
+	std::shared_ptr<Parameters> parameters;
 	int puma;
 	double hhIdx;
-	int hhType;
-	int hhSize;
-	int hhIncome, hhIncomeCat;
+	short int hhSize, hhType, hhIncomeCat;
+	int hhIncome;
 
 	std::vector<PersonPums> hhPersons;
-	std::map<std::string, int> m_householdType, m_householdIncome;
 };
 
 #endif __HouseholdPums_h__
