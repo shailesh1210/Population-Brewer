@@ -160,15 +160,13 @@ void Metro::drawHouseholds(IPUWrapper *ipuWrap, T *model)
 	std::string personType1, personType2;
 	std::string dummy = "0";
 
-	int pop_mem_size = (int)(1.02*population);
-
 	Random random;
 
 	while(!fit_pop)
 	{
 		int countHH = 0; int countPer = 0; 
 		
-		model->setSize(pop_mem_size);
+		model->setSize(population);
 		model->getCounter()->initialize();
 	
 		std::cout << "Drawing households - Attempt: " << ++num_draws << std::endl;

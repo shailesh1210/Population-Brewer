@@ -116,9 +116,11 @@ void ViolenceModel::runModel()
 	std::cout << "Running mass violence model..." << std::endl;
 	int curTick = 0;
 	int countPersons;
-	PairDD prevalence;
-
+	
+	VecDbls prevalence;
+	AgentListPtr tempAgents;
 	std::vector<Household>*households;
+	
 	for(auto map = pumaHouseholds.begin(); map != pumaHouseholds.end(); ++map)
 	{
 		households = &map->second;
@@ -126,7 +128,6 @@ void ViolenceModel::runModel()
 		while(curTick < getMaxWeeks())
 		{
 			countPersons = 0;
-
 			for(auto hh = households->begin(); hh != households->end(); ++hh)
 			{
 				for(auto pp = hh->begin(); pp != hh->end(); ++pp)
@@ -136,21 +137,27 @@ void ViolenceModel::runModel()
 						continue;
 
 					agent->excecuteRules(curTick);
+					
+					if(curTick == getMaxWeeks()-1)
+						tempAgents.push_back(agent);
+
 					countPersons++;
 				}
 			}
+
 			prevalence = count->getPrevalence(curTick, countPersons);
 			count->computeOutcomes(curTick, countPersons);
 
 			curTick++;
 		
 			std::cout << std::fixed;
-			std::cout << "Current tick: " << curTick  << std::setprecision(4) 
-				<< ", Prev(SC): " << prevalence.first <<", Prev(UC): " << prevalence.second
-				<< " | " << "CBT: " << count->getCbtUptake(curTick-1) 
-				<< "," << "SPR: " << count->getSprUptake(curTick-1) 
+			std::cout << "Tick: " << curTick  << std::setprecision(4) 
+				<< ", Pr(SC): " << prevalence[STEPPED_CARE] <<", Pr(UC): " << prevalence[USUAL_CARE] << ", Pr(NT): " << prevalence[NO_TREATMENT]
+				<< " | " << "CBT: " << count->getCbtUptake(curTick-1) << "," << "SPR: " << count->getSprUptake(curTick-1) 
 				<< "," << "ND: " << count->getNaturalDecayUptake(curTick-1) << std::endl;
 		}
+
+		count->computeCostEffectiveness(&tempAgents);
 	}
 
 }

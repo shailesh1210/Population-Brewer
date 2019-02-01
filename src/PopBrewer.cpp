@@ -18,7 +18,7 @@
 */
 
 #include "PopBrewer.h"
-#include "Parameters.h"
+//#include "Parameters.h"
 #include "County.h"
 #include "Metro.h"
 #include "csv.h"

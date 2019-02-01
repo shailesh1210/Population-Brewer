@@ -19,8 +19,6 @@ CardioModel::~CardioModel()
 
 void CardioModel::start()
 {
-	//Metro *curMSA = &metroAreas.at("10180");
-	//curMSA->createPopulation(this);
 	if(parameters != NULL)
 		count = new Counter(parameters);
 	else{
@@ -28,7 +26,14 @@ void CardioModel::start()
 		exit(EXIT_SUCCESS);
 	}
 
-	for(auto metro = metroAreas.begin(); metro != metroAreas.end(); ++metro)
+	
+	Metro *curMSA = &metroAreas.at("10180");
+	createPopulation(curMSA);
+	setRiskFactors();
+	clearList();
+	//curMSA->createPopulation(this);
+
+	/*for(auto metro = metroAreas.begin(); metro != metroAreas.end(); ++metro)
 	{
 		createPopulation(&metro->second);
 		setRiskFactors();
@@ -37,7 +42,7 @@ void CardioModel::start()
 			count->output(metro->second.getGeoID());
 
 		clearList();
-	}
+	}*/
 }
 
 void CardioModel::createPopulation(Metro *metro)
@@ -69,6 +74,8 @@ void CardioModel::addAgent(const PersonPums *p)
 
 			agentList.push_back(*agent);
 			agentsPtrMap.insert(std::make_pair(key_map, &agentList[agentList.size()-1]));
+
+			count->addPersonCount(a_org, a_sex);
 					
 			delete agent;
 		}
@@ -98,6 +105,7 @@ void CardioModel::setRiskFactors()
 	int risk_count, risk_type;
 	std::vector<PairDD> risk_pair;
 	
+	int counter = 0;
 	Random random;
 	for(auto map_itr = riskStrataMap.begin(); map_itr != riskStrataMap.end(); ++map_itr)
 	{
@@ -109,6 +117,7 @@ void CardioModel::setRiskFactors()
 		std::vector<int> pop_risk_strata(map_itr->second.size());
 		for(auto agent = pop_range.first; agent != pop_range.second; ++agent)
 		{
+			counter++;
 			boost::range::random_shuffle(map_itr->second);
 			for(auto riskIdx = map_itr->second.begin(); riskIdx != map_itr->second.end();)
 			{
@@ -122,6 +131,8 @@ void CardioModel::setRiskFactors()
 					risk_type = (int)riskIdx->second;
 
 					agent->second->setRiskFactors(random, risk_type);
+
+					count->sumRiskFactors(agent->second);
 					count->addRiskFactorCount(std::to_string(risk_type)+agent->first);
 
 					risk_count--;
@@ -146,6 +157,42 @@ void CardioModel::setRiskFactors()
 	}
 	
 	std::cout << "Assignment Complete! " << std::endl;
+	setFraminghamRiskScore();
+	
+}
+
+void CardioModel::setFraminghamRiskScore()
+{
+	MapDbl mean_age, mean_tchols, mean_hdl, mean_bp, per_smoking;
+	EET::Framingham male(getBeta(NHANES::Sex::Male)), female(getBeta(NHANES::Sex::Female));
+
+	for(auto org : NHANES::Org::_values())
+	{
+		std::cout << std::endl;
+		for(auto sex : NHANES::Sex::_values())
+		{
+			std::cout << std::endl; 
+			std::string agentType = std::to_string(org)+std::to_string(sex);
+			
+			mean_age.insert(std::make_pair(agentType, count->getMeanAge(agentType)));
+			mean_tchols.insert(std::make_pair(agentType, count->getMeanTchols(agentType)));
+			mean_hdl.insert(std::make_pair(agentType, count->getMeanHChols(agentType)));
+			mean_bp.insert(std::make_pair(agentType, count->getMeanBP(agentType)));
+			per_smoking.insert(std::make_pair(agentType, count->getPercentSmoking(agentType)));
+			
+			std::cout << "Person Type: " << agentType << std::endl;
+			
+			std::cout << "Mean age: " << mean_age[agentType] << std::endl; 
+			std::cout << "Mean Tchols : " << mean_tchols[agentType] << std::endl;
+			std::cout << "Mean HDLchols : " << mean_hdl[agentType] << std::endl;
+			std::cout << "Mean SysBP : " << mean_bp[agentType] << std::endl;
+			std::cout << "% Smoking: " << per_smoking[agentType] << std::endl;
+
+		}
+
+		std::cout << std::endl;
+	}
+
 }
 
 void CardioModel::rounding(std::vector<PairDD> &popCount, double & adj)
@@ -168,6 +215,21 @@ void CardioModel::rounding(std::vector<PairDD> &popCount, double & adj)
 Counter * CardioModel::getCounter() const
 {
 	return count;
+}
+
+EET::Framingham CardioModel::getBeta(int gender)
+{
+	switch(gender)
+	{
+	case NHANES::Sex::Male:
+		return parameters->getCardioParam()->male_coeff;
+		break;
+	case NHANES::Sex::Female:
+		return parameters->getCardioParam()->female_coeff;
+		break;
+	default:
+		break;
+	}
 }
 
 void CardioModel::setSize(int pop)

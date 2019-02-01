@@ -39,47 +39,55 @@ int main(int argc, const char* argv[])
 	std::cout << std::endl;
 
 	std::vector<const char*> arguments;
-	const int NUM_ARGUMENTS = 3;
+	const int NUM_ARGUMENTS = 4;
 
 	if(argc < NUM_ARGUMENTS)
 	{
 		std::cout << "Program usage format\n";
-		std::cout << "Program name[Synthetic Pop] Input Directory[input] Output Directory[output]" << std::endl;
+		std::cout << "Program name[Synthetic Pop] Input Directory[input] Output Directory[output] Simulation Type[MVS=2 or EET=1] Interactive[0 or 1]"
+			<< std::endl;
 		exit(EXIT_SUCCESS);
 	}
 
 	for(int i = 0; i < argc; i++)
 		arguments.push_back(argv[i]);
 
-	std::cout << "****Available simulation models****" << std::endl;
-	std::cout << "1. Equity Efficiency Model" << std::endl;
-	std::cout << "2. Mass Violence Model\n" << std::endl;
-
 	int simType;
+	bool interactive = (std::stoi(arguments.back()) != 0) ? true : false;
 
-	std::cout << "Please select simulation model (Enter 1 or 2) : ";
-	std::cin >> simType; 
-
-	if(std::cin.eof())
-		exit(EXIT_SUCCESS);
-
-	while(!std::cin.eof() && !std::cin.good() || simType < EQUITY_EFFICIENCY || simType > MASS_VIOLENCE)
+	if(interactive)
 	{
-		std::cout << "Invalid input!" << std::endl;
-		std::cin.clear();
-		std::cin.ignore(256,'\n');
+		std::cout << "****Available simulation models****" << std::endl;
+		std::cout << "1. Equity Efficiency Model" << std::endl;
+		std::cout << "2. Mass Violence Model\n" << std::endl;
 
-		std::cout << "Please re-enter valid value: ";
-		std::cin >> simType;
+		std::cout << "Please select simulation model (Enter 1 or 2) : ";
+		std::cin >> simType; 
 
 		if(std::cin.eof())
 			exit(EXIT_SUCCESS);
+
+		while(!std::cin.eof() && !std::cin.good() || simType < EQUITY_EFFICIENCY || simType > MASS_VIOLENCE)
+		{
+			std::cout << "Invalid input!" << std::endl;
+			std::cin.clear();
+			std::cin.ignore(256,'\n');
+
+			std::cout << "Please re-enter valid value: ";
+			std::cin >> simType;
+
+			if(std::cin.eof())
+			exit(EXIT_SUCCESS);
+		}
+	}
+	else
+	{
+		simType = std::stoi(arguments[3]);
 	}
 
 	std::cout << std::endl;
-
 	Parameters *param = new Parameters(arguments[1], arguments[2], simType);
-
+	
 	switch(param->getSimType())
 	{
 	case EQUITY_EFFICIENCY:

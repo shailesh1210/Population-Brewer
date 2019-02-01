@@ -58,18 +58,16 @@ void CardioAgent::setRiskFactors(Random &random, short int rfs)
 {
 	this->rfStrata = rfs;
 
-	std::string agentType = std::to_string(rfStrata)+std::to_string(nhanes_org)
-		+std::to_string(sex)+std::to_string(nhanes_ageCat)+std::to_string(nhanes_edu);
-
-	setTotalCholesterol(random, agentType);
-	setLDLCholesterol(random, agentType);
-	setSystolicBp(random, agentType);
+	setTotalCholesterol(random);
+	setHDLCholesterol(random);
+	setSystolicBp(random);
 	setSmokingStatus();
 }
 
-void CardioAgent::setTotalCholesterol(Random & random, std::string agentType)
+void CardioAgent::setTotalCholesterol(Random & random)
 {
 	const PairMap *tcholsMap = parameters->getRiskFactorMap(NHANES::RiskFac::totalChols);
+	std::string agentType = getAgentType();
 	if(tcholsMap->count(agentType) > 0)
 	{
 		PairDD tchols_pair = tcholsMap->at(agentType);
@@ -77,19 +75,21 @@ void CardioAgent::setTotalCholesterol(Random & random, std::string agentType)
 	}
 }
 
-void CardioAgent::setLDLCholesterol(Random & random, std::string agentType)
+void CardioAgent::setHDLCholesterol(Random & random)
 {
-	const PairMap *ldlCholsMap = parameters->getRiskFactorMap(NHANES::RiskFac::LdlChols);
-	if(ldlCholsMap->count(agentType) > 0)
+	const PairMap *hdlCholsMap = parameters->getRiskFactorMap(NHANES::RiskFac::HdlChols);
+	std::string agentType = getAgentType();
+	if(hdlCholsMap->count(agentType) > 0)
 	{
-		PairDD ldl_pair = ldlCholsMap->at(agentType);
-		chart.ldlChols = random.normal_dist(ldl_pair.first, ldl_pair.second);
+		PairDD hdl_pair = hdlCholsMap->at(agentType);
+		chart.hdlChols = random.normal_dist(hdl_pair.first, hdl_pair.second);
 	}
 }
 
-void CardioAgent::setSystolicBp(Random & random, std::string agentType)
+void CardioAgent::setSystolicBp(Random & random)
 {
 	const PairMap *sysBpMap = parameters->getRiskFactorMap(NHANES::RiskFac::SystolicBp);
+	std::string agentType = getAgentType();
 	if(sysBpMap->count(agentType) > 0)
 	{
 		PairDD bp_pair = sysBpMap->at(agentType);
@@ -128,6 +128,14 @@ short int CardioAgent::getNHANESEduCat() const
 short int CardioAgent::getRiskStrata() const
 {
 	return rfStrata;
+}
+
+std::string CardioAgent::getAgentType() const
+{
+	std::string agentType = std::to_string(rfStrata)+std::to_string(nhanes_org)
+		+std::to_string(sex)+std::to_string(nhanes_ageCat)+std::to_string(nhanes_edu);
+
+	return agentType;
 }
 
 RiskFactors CardioAgent::getRiskChart() const

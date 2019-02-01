@@ -27,10 +27,15 @@ ViolenceAgent::ViolenceAgent(std::shared_ptr<Parameters> param, const PersonPums
 	{
 		this->ptsdx[i] = 0.0;
 		this->ptsdTime[i] = 0;
+		this->durMild[i] = 0;
+		this->durMod[i] = 0;
+		this->durSevere[i] = 0;
+
 		this->curCBT[i] = false;
 		this->curSPR[i] = false;
 		this->sessionsCBT[i] = 0;
 		this->sessionsSPR[i] = 0;
+
 		this->isResolved[i] = false;
 		this->resolvedTime[i] = 0;
 		this->numRelapse[i] = 0;
@@ -134,6 +139,8 @@ void ViolenceAgent::ptsdScreeningSteppedCare(int tick)
 			{
 				cbtReferred = true;
 				sprReferred = false;
+
+				counter->addCbtReferredNonPtsd();
 			}
 			else
 			{
@@ -173,22 +180,20 @@ void ViolenceAgent::symptomResolution(int tick, int treatment)
 		strength = parameters->getViolenceParam()->cbt_coeff;
 		max_sessions = parameters->getViolenceParam()->max_cbt_sessions;
 	
-		if(ptsdx[treatment] >= getPtsdCutOff() && treatment == STEPPED_CARE)
-			counter->addCbtCount(tick);
-
 		sessionsCBT[treatment] += 1;
 		curCBT[treatment] = false;
+
+		counter->addCbtCount(this, tick, treatment);
 	}
 	else if(!curCBT[treatment] && curSPR[treatment])
 	{
 		strength = parameters->getViolenceParam()->spr_coeff;
 		max_sessions =  parameters->getViolenceParam()->max_spr_sessions;
 
-		if(ptsdx[treatment] >= getPtsdCutOff() && treatment == STEPPED_CARE)
-			counter->addSprCount(tick);
-
 		sessionsSPR[treatment] += 1;
 		curSPR[treatment] = false;
+
+		counter->addSprCount(this, tick, treatment);
 	}
 	else if(!curCBT[treatment] && !curSPR[treatment])
 	{
@@ -207,7 +212,7 @@ void ViolenceAgent::symptomResolution(int tick, int treatment)
 	if(ptsdx[treatment] > 0)
 	{
 		ptsdx[treatment] = ptsdx[treatment] - (strength/max_sessions)*ptsdx[treatment];
-
+		
 		if(ptsdx[treatment] < 0)
 			ptsdx[treatment] = 0;
 
@@ -219,6 +224,15 @@ void ViolenceAgent::symptomResolution(int tick, int treatment)
 				isResolved[treatment] = false;
 
 				counter->addPtsdCount(treatment, getPtsdType(), tick);
+
+				//counter to keep track of time-spent by an agent at different levels of PTSDx
+				if(ptsdx[treatment] <= MILD_PTSDX_MAX)
+					durMild[treatment]++;
+				else if(ptsdx[treatment] <= MOD_PTSDX_MAX)
+					durMod[treatment]++;
+				else if(ptsdx[treatment] <= MAX_PTSDX)
+					durSevere[treatment]++;
+
 			}
 			else if(ptsdx[treatment] < getPtsdCutOff() && !isResolved[treatment])
 			{
@@ -231,6 +245,7 @@ void ViolenceAgent::symptomResolution(int tick, int treatment)
 				resolvedTime[treatment] += 1;
 			}
 		}
+		
 	}
 }
 
@@ -272,7 +287,7 @@ void ViolenceAgent::provideCBT(int tick, int treatment)
 		double randomP = random->uniform_real_dist();
 		int maxCBTsessions = parameters->getViolenceParam()->max_cbt_sessions;
 	
-		if(randomP < pCBT && tick <= getMaxCbtTime())
+		if(randomP < pCBT && tick < getMaxCbtTime())
 		{
 			curSPR[treatment] = false;
 			if(sessionsCBT[treatment] < 2*maxCBTsessions)
@@ -288,6 +303,11 @@ void ViolenceAgent::provideCBT(int tick, int treatment)
 		}
 		else
 		{
+			if(initPtsdx < getPtsdCutOff() && tick == getMaxCbtTime())
+			{
+				cbtReferred = false;
+				sprReferred = true;
+			}
 			provideSPR(tick, treatment);
 		}
 	}
@@ -307,7 +327,7 @@ void ViolenceAgent::provideSPR(int tick, int treatment)
 		double randomP = random->uniform_real_dist();
 		int maxSPRsessions = parameters->getViolenceParam()->max_spr_sessions;
 
-		if(randomP < pSPR && tick <= getMaxSprTime())
+		if(randomP < pSPR && tick < getMaxSprTime())
 		{
 			if(sessionsSPR[treatment] < maxSPRsessions)
 				curSPR[treatment] = true;
@@ -474,6 +494,10 @@ std::string ViolenceAgent::getAgentIdx() const
 	return agentIdx;
 }
 
+double ViolenceAgent::getInitPTSDx() const
+{
+	return initPtsdx;
+}
 
 double ViolenceAgent::getPTSDx(int treatment) const
 {
@@ -517,6 +541,7 @@ double ViolenceAgent::getPTSDx(PairDD pair_ptsdx) const
 				if(ptsdx_ > MAX_PTSDX)
 					ptsdx_ = MAX_PTSDX;
 				
+				//add to parameters files - secondary and tertiary PTSD coeffs
 				if(secPTSD)
 					ptsdx_ = 0.9*ptsdx_;
 				else if(terPTSD)
@@ -555,6 +580,26 @@ bool ViolenceAgent::getPTSDstatus(int type) const
 	}
 }
 
+bool ViolenceAgent::getCBTReferred() const
+{
+	return cbtReferred;
+}
+
+bool ViolenceAgent::getSPRReferred() const
+{
+	return sprReferred;
+}
+
+short int ViolenceAgent::getCBTsessions(int treatment) const
+{
+	return sessionsCBT[treatment];
+}
+
+short int ViolenceAgent::getSPRsessions(int treatment) const
+{
+	return sessionsSPR[treatment];
+}
+
 int ViolenceAgent::getPtsdType() const
 {
 	int ptsd_type = -1;
@@ -567,6 +612,26 @@ int ViolenceAgent::getPtsdType() const
 		ptsd_type = TERTIARY;
 
 	return ptsd_type;
+}
+
+int ViolenceAgent::getDurationMild(int treatment) const
+{
+	return durMild[treatment];
+}
+
+int ViolenceAgent::getDurationModerate(int treatment) const
+{
+	return durMod[treatment];
+}
+
+int ViolenceAgent::getDurationSevere(int treatment) const
+{
+	return durSevere[treatment];
+}
+
+int ViolenceAgent::getResolvedTime(int treatment) const
+{
+	return resolvedTime[treatment];
 }
 
 std::string ViolenceAgent::getSchoolName() const
@@ -593,7 +658,7 @@ int ViolenceAgent::getMaxCbtTime() const
 {
 	int screening_time = parameters->getViolenceParam()->screening_time;
 	if(initPtsdx >= getPtsdCutOff())
-		return parameters->getViolenceParam()->tot_steps;
+		return parameters->getViolenceParam()->treatment_time;
 	else
 		return screening_time+parameters->getViolenceParam()->cbt_dur_non_cases;
 
@@ -601,7 +666,7 @@ int ViolenceAgent::getMaxCbtTime() const
 
 int ViolenceAgent::getMaxSprTime() const
 {
-	return parameters->getViolenceParam()->tot_steps;
+	return parameters->getViolenceParam()->treatment_time;
 }
 
 bool ViolenceAgent::isStudent() const

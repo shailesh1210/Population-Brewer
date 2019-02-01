@@ -36,6 +36,7 @@ Parameters::Parameters(const char *inDir, const char *outDir, const int simModel
 	if(simType == EQUITY_EFFICIENCY)
 	{
 		readNHANESRiskFactors();
+		readFraminghamCoefficients();
 	}
 	else if(simType == MASS_VIOLENCE)
 	{
@@ -222,11 +223,24 @@ Parameters::PairMap * Parameters::getPtsdSymptoms()
 //	}
 //}
 
-const ViolenceParams* Parameters::getViolenceParam()
+const MVS::ViolenceParams* Parameters::getViolenceParam()
 {
 	if(simType == MASS_VIOLENCE)
 	{
 		return &vParams;
+	}
+	else
+	{
+		std::cout << "Error: Wrong simulation model selected!" << std::endl;
+		exit(EXIT_SUCCESS);
+	}
+}
+
+const EET::CardioParams* Parameters::getCardioParam()
+{
+	if(simType == EQUITY_EFFICIENCY)
+	{
+		return &cardioParams;
 	}
 	else
 	{
@@ -255,15 +269,15 @@ const Parameters::PairMap * Parameters::getRiskFactorMap(int type)
 	}
 }
 
-const Parameters::PairMap * Parameters::getRiskFactorCI(int type)
-{
-	if(m_risk_ci.count(type) > 0)
-		return &m_risk_ci[type];
-	else{
-		std::cout << "Error: Risk factor type = " << type << " doesn't exist!" << std::endl;
-		exit(EXIT_SUCCESS);
-	}
-}
+//const Parameters::PairMap * Parameters::getRiskFactorCI(int type)
+//{
+//	if(m_risk_ci.count(type) > 0)
+//		return &m_risk_ci[type];
+//	else{
+//		std::cout << "Error: Risk factor type = " << type << " doesn't exist!" << std::endl;
+//		exit(EXIT_SUCCESS);
+//	}
+//}
 
 /**
 *	@brief Reads and stores PUMS data dictionary for housing and
@@ -398,22 +412,22 @@ void Parameters::readNHANESRiskFactors()
 	io::CSVReader<13>nhanes_risks(getFilePath("risk_factors/nhanes_risk_factors.csv"));
 	nhanes_risks.read_header(io::ignore_extra_column, "Risk_Score", "Race", 
 		"Gender", "Age_Cat", "Edu_Cat", "Freq_nhanes", "Mean_Tchols", "Err_Tchols",
-		"Mean_LDL", "Err_LDL", "Mean_bp", "Err_bp", "smoking_stat");
+		"Mean_HDL", "Err_HDL", "Mean_bp", "Err_bp", "smoking_stat");
 
 	const char *risk_score = NULL; const char *race = NULL;
 	const char *sex = NULL; const char *age_cat = NULL; const char *edu_cat = NULL;
 	const char *freq = NULL; 
 	const char *tchols = NULL; const char *err_tchols = NULL;
-	const char *ldlChols = NULL; const char *err_ldl = NULL;
+	const char *hdlChols = NULL; const char *err_hdl = NULL;
 	const char *sysBp = NULL; const char *err_sysBp = NULL;
 	const char *smokingStat = NULL;
 
 	std::map<std::string, std::vector<double>> m_tempFreq;
-	std::map<std::string, PairDD> m_tchols, m_ldlChols, m_sysBp, m_smoking;
+	std::map<std::string, PairDD> m_tchols, m_hdlChols, m_sysBp, m_smoking;
 
 	while(nhanes_risks.read_row(risk_score, race, 
 		sex, age_cat, edu_cat, freq, tchols, err_tchols,
-		ldlChols, err_ldl, sysBp, err_sysBp, smokingStat))
+		hdlChols, err_hdl, sysBp, err_sysBp, smokingStat))
 	{
 		double freq_ = std::stod(freq);
 		int risk_strata = std::stoi(risk_score);
@@ -439,7 +453,7 @@ void Parameters::readNHANESRiskFactors()
 		}
 
 		setRiskFactors(m_tchols, tchols, err_tchols, key_risk);
-		setRiskFactors(m_ldlChols, ldlChols, err_ldl, key_risk);
+		setRiskFactors(m_hdlChols, hdlChols, err_hdl, key_risk);
 		setRiskFactors(m_sysBp, sysBp, err_sysBp, key_risk);
 
 		if(key_person_type == "1111")
@@ -460,62 +474,84 @@ void Parameters::readNHANESRiskFactors()
 	}
 
 	m_risks.insert(std::make_pair(NHANES::RiskFac::totalChols, m_tchols));
-	m_risks.insert(std::make_pair(NHANES::RiskFac::LdlChols, m_ldlChols));
+	m_risks.insert(std::make_pair(NHANES::RiskFac::HdlChols, m_hdlChols));
 	m_risks.insert(std::make_pair(NHANES::RiskFac::SystolicBp, m_sysBp));
 	m_risks.insert(std::make_pair(NHANES::RiskFac::SmokingStat, m_smoking));
 
-	readNHANESRiskFactorsCI();
+	//readNHANESRiskFactorsCI();
 }
 
-void Parameters::readNHANESRiskFactorsCI()
+void Parameters::readFraminghamCoefficients()
 {
-	std::string dir = "risk_factors/";
-	std::map<int, std::string> m_files;
+	io::CSVReader<3>framingham_file(getFilePath("risk_factors/framingham_params.csv"));
+	framingham_file.read_header(io::ignore_extra_column, "Variable", "Male", "Female");
 
-	m_files.insert(std::make_pair(NHANES::RiskFac::totalChols, "Tchols_CI.csv"));
-	m_files.insert(std::make_pair(NHANES::RiskFac::LdlChols, "LDL_CI.csv"));
-	m_files.insert(std::make_pair(NHANES::RiskFac::SystolicBp, "Systolic_CI.csv"));
+	const char* var = NULL;
+	const char* male_val = NULL;
+	const char* female_val = NULL;
 
-	const char *race = NULL; const char *gender = NULL;
-	const char *ageCat = NULL; const char *edu = NULL;
-	const char *riskStrata = NULL; const char *ll = NULL; 
-	const char *ul = NULL;
-
-	std::map<std::string, PairDD> ci_tchols, ci_ldl, ci_systolic;
-
-	for(size_t i = NHANES::RiskFac::totalChols; i <= NHANES::RiskFac::SystolicBp; ++i)
+	PairMap m_framingham;
+	while(framingham_file.read_row(var, male_val, female_val))
 	{
-		std::string full_path = dir+m_files[i];
-		io::CSVReader<7> nhanes_rf_ci(getFilePath(full_path.c_str()));
+		PairDD gender;
+		gender.first = std::stod(male_val);
+		gender.second = std::stod(female_val);
 
-		nhanes_rf_ci.read_header(io::ignore_extra_column,"Race", "Gender", "Education", "Age", "Rf", "ll", "ul");
-
-		while(nhanes_rf_ci.read_row(race, gender, edu, ageCat, riskStrata, ll, ul))
-		{
-			std::string person_type = getNHANESpersonType(race, gender, ageCat, edu);
-			std::string key_risk = std::to_string(std::stoi(riskStrata))+person_type;
-
-			switch(i)
-			{
-			case NHANES::RiskFac::totalChols:
-				setRiskFactors(ci_tchols, ll, ul, key_risk);
-				break;
-			case NHANES::RiskFac::LdlChols:
-				setRiskFactors(ci_ldl, ll, ul, key_risk);
-				break;
-			case NHANES::RiskFac::SystolicBp:
-				setRiskFactors(ci_systolic, ll, ul, key_risk);
-				break;
-			default:
-				break;
-			}
-		}
+		m_framingham.insert(std::make_pair(var, gender));
 	}
 
-	m_risk_ci.insert(std::make_pair(NHANES::RiskFac::totalChols, ci_tchols));
-	m_risk_ci.insert(std::make_pair(NHANES::RiskFac::LdlChols, ci_ldl));
-	m_risk_ci.insert(std::make_pair(NHANES::RiskFac::SystolicBp, ci_systolic));
+	setCardioParams(&m_framingham);
 }
+
+//void Parameters::readNHANESRiskFactorsCI()
+//{
+//	std::string dir = "risk_factors/";
+//	std::map<int, std::string> m_files;
+//
+//	m_files.insert(std::make_pair(NHANES::RiskFac::totalChols, "Tchols_CI.csv"));
+//	m_files.insert(std::make_pair(NHANES::RiskFac::LdlChols, "LDL_CI.csv"));
+//	m_files.insert(std::make_pair(NHANES::RiskFac::SystolicBp, "Systolic_CI.csv"));
+//
+//	const char *race = NULL; const char *gender = NULL;
+//	const char *ageCat = NULL; const char *edu = NULL;
+//	const char *riskStrata = NULL; const char *ll = NULL; 
+//	const char *ul = NULL;
+//
+//	std::map<std::string, PairDD> ci_tchols, ci_ldl, ci_systolic;
+//
+//	for(size_t i = NHANES::RiskFac::totalChols; i <= NHANES::RiskFac::SystolicBp; ++i)
+//	{
+//		std::string full_path = dir+m_files[i];
+//		io::CSVReader<7> nhanes_rf_ci(getFilePath(full_path.c_str()));
+//
+//		nhanes_rf_ci.read_header(io::ignore_extra_column,"Race", "Gender", "Education", "Age", "Rf", "ll", "ul");
+//
+//		while(nhanes_rf_ci.read_row(race, gender, edu, ageCat, riskStrata, ll, ul))
+//		{
+//			std::string person_type = getNHANESpersonType(race, gender, ageCat, edu);
+//			std::string key_risk = std::to_string(std::stoi(riskStrata))+person_type;
+//
+//			switch(i)
+//			{
+//			case NHANES::RiskFac::totalChols:
+//				setRiskFactors(ci_tchols, ll, ul, key_risk);
+//				break;
+//			case NHANES::RiskFac::LdlChols:
+//				setRiskFactors(ci_ldl, ll, ul, key_risk);
+//				break;
+//			case NHANES::RiskFac::SystolicBp:
+//				setRiskFactors(ci_systolic, ll, ul, key_risk);
+//				break;
+//			default:
+//				break;
+//			}
+//		}
+//	}
+//
+//	m_risk_ci.insert(std::make_pair(NHANES::RiskFac::totalChols, ci_tchols));
+//	m_risk_ci.insert(std::make_pair(NHANES::RiskFac::LdlChols, ci_ldl));
+//	m_risk_ci.insert(std::make_pair(NHANES::RiskFac::SystolicBp, ci_systolic));
+//}
 
 void Parameters::setRiskFactors(std::map<std::string, PairDD> &map_risks, const char* var1, const char *var2, std::string key)
 {
@@ -534,6 +570,37 @@ void Parameters::setRiskFactors(std::map<std::string, PairDD> &map_risks, const 
 		std::cout << "Error: Mean and Std Error values cannot be NULL!" << std::endl;
 		exit(EXIT_SUCCESS);
 	}
+}
+
+void Parameters::setCardioParams(PairMap *m_params)
+{
+	cardioParams.male_coeff.beta_age = m_params->at("beta_age").first;
+	cardioParams.female_coeff.beta_age = m_params->at("beta_age").second;
+
+	cardioParams.male_coeff.beta_tchols = m_params->at("beta_tchols").first;
+	cardioParams.female_coeff.beta_tchols = m_params->at("beta_tchols").second;
+
+	cardioParams.male_coeff.beta_hdl = m_params->at("beta_hdl").first;
+	cardioParams.female_coeff.beta_hdl = m_params->at("beta_hdl").second;
+
+	cardioParams.male_coeff.beta_sbp = m_params->at("beta_sbp").first;
+	cardioParams.female_coeff.beta_sbp = m_params->at("beta_sbp").second;
+
+	cardioParams.male_coeff.beta_trt_sbp = m_params->at("beta_trt_sbp").first;
+	cardioParams.female_coeff.beta_trt_sbp = m_params->at("beta_trt_sbp").second;
+
+	cardioParams.male_coeff.beta_smoker = m_params->at("beta_smoker").first;
+	cardioParams.female_coeff.beta_smoker = m_params->at("beta_smoker").second;
+
+	cardioParams.male_coeff.beta_age_tchols = m_params->at("beta_age_tchols").first;
+	cardioParams.female_coeff.beta_age_tchols = m_params->at("beta_age_tchols").second;
+
+	cardioParams.male_coeff.beta_age_smoker = m_params->at("beta_age_smoker").first;
+	cardioParams.female_coeff.beta_age_smoker = m_params->at("beta_age_smoker").second;
+
+	cardioParams.male_coeff.beta_sq_age = m_params->at("beta_sq_age").first;
+	cardioParams.female_coeff.beta_sq_age = m_params->at("beta_sq_age").second;
+
 }
 
 /**
@@ -632,6 +699,7 @@ void Parameters::setViolenceParams(MapDbl *m_param)
 	vParams.sensitivity = m_param->at("sensitivity");
 	vParams.specificity = m_param->at("specificity");
 	vParams.tot_steps = (int)m_param->at("tot_steps");
+	vParams.treatment_time = (int)m_param->at("treatment_time");
 	vParams.num_trials = (int)m_param->at("num_trials");
 	vParams.cbt_dur_non_cases = (int)m_param->at("cbt_dur_non_cases");
 	vParams.max_cbt_sessions = (int)m_param->at("max_cbt_sessions");
@@ -639,12 +707,18 @@ void Parameters::setViolenceParams(MapDbl *m_param)
 	vParams.cbt_coeff = m_param->at("cbt_coeff");
 	vParams.spr_coeff = m_param->at("spr_coeff");
 	vParams.nd_coeff = m_param->at("nd_coeff");
+	vParams.cbt_cost = (int)m_param->at("cbt_cost");
+	vParams.spr_cost = (int)m_param->at("spr_cost");
 	vParams.percent_nd = m_param->at("percent_nd");
 	vParams.nd_dur = (int)m_param->at("nd_dur");
 	vParams.ptsdx_relapse = m_param->at("ptsdx_relapse");
 	vParams.time_relapse = (int)m_param->at("time_relapse");
 	vParams.num_relapse = (int)m_param->at("num_relapse");
 	vParams.percent_relapse = m_param->at("percent_relapse");
+	vParams.dw_mild = m_param->at("dw_mild");
+	vParams.dw_moderate = m_param->at("dw_moderate");
+	vParams.dw_severe = m_param->at("dw_severe");
+	vParams.discount = m_param->at("discount");
 }
 
 /**
